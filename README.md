@@ -1,0 +1,1 @@
+# Avito_Backend_trainee_assignment_autumn-2025
