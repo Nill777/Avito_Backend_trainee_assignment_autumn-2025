@@ -22,6 +22,19 @@
 - Swagger UI (визуальный интерфейс): [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
 - OpenAPI Spec (исходный файл): [http://localhost:8080/openapi.yaml](http://localhost:8080/openapi.yaml)
 
+## Дополнительные задания
+
+### 1. Линтер
+
+Интегрирован статический анализатор **golangci-lint**
+
+Конфигурация с набором правил находится в файле `.golangci.yml`
+
+**Запуск анализатора:**
+```bash
+make lint
+```
+
 ## Конфигурация
 
 Настройки задаются через переменные окружения в `docker-compose.yml`:

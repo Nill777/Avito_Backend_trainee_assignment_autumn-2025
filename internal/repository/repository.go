@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
-	"reviewer/internal/domain"
 	"time"
+
+	"reviewer/internal/domain"
 )
 
 type Repository interface {
@@ -17,7 +18,7 @@ type Repository interface {
 	GetUsersByTeam(ctx context.Context, teamName string) ([]domain.User, error)
 	UpdateUser(ctx context.Context, id string, isActive *bool) (domain.User, error)
 
-	CreatePR(ctx context.Context, pr domain.PullRequest) (domain.PullRequest, error)
+	CreatePR(ctx context.Context, pr *domain.PullRequest) (*domain.PullRequest, error)
 	GetPR(ctx context.Context, id string) (domain.PullRequest, error)
 	GetPRForUpdate(ctx context.Context, id string) (domain.PullRequest, error)
 	UpdatePRStatus(ctx context.Context, id string, status domain.PRStatus) (time.Time, error)

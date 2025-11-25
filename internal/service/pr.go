@@ -4,19 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"reviewer/internal/domain"
 	"reviewer/internal/repository"
 )
 
-func (s *Service) CreatePR(ctx context.Context, prID, title, authorID string) (domain.PullRequest, error) {
+func (s *Service) CreatePR(ctx context.Context, prID, title, authorID string) (*domain.PullRequest, error) {
 	author, err := s.repo.GetUser(ctx, authorID)
 	if err != nil {
-		return domain.PullRequest{}, fmt.Errorf("getting author: %w", err)
+		return nil, fmt.Errorf("getting author: %w", err)
 	}
 
 	candidates, err := s.repo.GetActiveTeamMembers(ctx, author.TeamName)
 	if err != nil {
-		return domain.PullRequest{}, fmt.Errorf("getting candidates: %w", err)
+		return nil, fmt.Errorf("getting candidates: %w", err)
 	}
 
 	validCandidates := make([]domain.User, 0, len(candidates))
@@ -32,14 +33,14 @@ func (s *Service) CreatePR(ctx context.Context, prID, title, authorID string) (d
 		selectedIDs[i] = u.ID
 	}
 
-	var createdPR domain.PullRequest
+	var createdPR *domain.PullRequest
 	txRepo, ok := s.repo.(repository.Transactor)
 	if !ok {
-		return domain.PullRequest{}, errors.New("repository does not support transactions")
+		return nil, errors.New("repository does not support transactions")
 	}
 
 	err = txRepo.RunInTx(ctx, func(ctxTx context.Context) error {
-		prModel := domain.PullRequest{
+		prModel := &domain.PullRequest{
 			ID:       prID,
 			Title:    title,
 			AuthorID: author.ID,
@@ -56,12 +57,16 @@ func (s *Service) CreatePR(ctx context.Context, prID, title, authorID string) (d
 			return err
 		}
 
-		createdPR, err = s.repo.GetPR(ctxTx, pr.ID)
-		return err
+		tempPR, err := s.repo.GetPR(ctxTx, pr.ID)
+		if err != nil {
+			return err
+		}
+		createdPR = &tempPR
+		return nil
 	})
 
 	if err != nil {
-		return domain.PullRequest{}, err
+		return nil, err
 	}
 
 	return createdPR, nil

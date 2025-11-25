@@ -2,18 +2,19 @@ package postgres
 
 import (
 	"context"
-	"reviewer/internal/domain"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+
+	"reviewer/internal/domain"
 )
 
-func (r *repositoryImpl) CreatePR(ctx context.Context, pr domain.PullRequest) (domain.PullRequest, error) {
+func (r *repositoryImpl) CreatePR(ctx context.Context, pr *domain.PullRequest) (*domain.PullRequest, error) {
 	q := `INSERT INTO pull_requests (id, title, author_id, team_name, status) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`
 	err := r.getQuerier(ctx).QueryRow(ctx, q, pr.ID, pr.Title, pr.AuthorID, pr.TeamName, pr.Status).
 		Scan(&pr.ID, &pr.CreatedAt)
 	if err != nil {
-		return domain.PullRequest{}, r.handleError(err)
+		return nil, r.handleError(err)
 	}
 	pr.Reviewers = []string{}
 	return pr, nil

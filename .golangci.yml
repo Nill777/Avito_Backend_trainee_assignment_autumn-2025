@@ -1,0 +1,32 @@
+run:
+  timeout: 3m
+
+issues:
+  exclude-dirs:
+    - bin
+
+linters-settings:
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: reviewer
+  gocritic:
+    enabled-tags:
+      - performance
+      - style
+      - experimental
+  stylecheck:
+    checks: ["all"]
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - revive
+    - govet
+    - staticcheck
+    - errcheck
+    - stylecheck
+    - unused
+    - gocritic
+    - prealloc
