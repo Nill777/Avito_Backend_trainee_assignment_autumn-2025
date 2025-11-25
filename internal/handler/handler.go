@@ -29,6 +29,7 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 	r.Post("/pullRequest/create", h.CreatePR)
 	r.Post("/pullRequest/merge", h.MergePR)
 	r.Post("/pullRequest/reassign", h.ReassignReviewer)
+	r.Get("/healthz", h.HealthCheck)
 	r.Get("/stats/assignments", h.ReviewerStats)
 }
 

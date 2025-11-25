@@ -27,7 +27,7 @@ type Repository interface {
 	RemoveReviewer(ctx context.Context, prID, userID string) error
 	ListPRsByReviewer(ctx context.Context, reviewerID string) ([]domain.PullRequestShort, error)
 
-	GetReviewerStats(ctx context.Context) (map[string]int64, error)
+	GetReviewerStats(ctx context.Context) ([]domain.UserAssignmentStats, error)
 }
 
 type Transactor interface {

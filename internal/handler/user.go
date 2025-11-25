@@ -39,12 +39,3 @@ func (h *Handler) GetUserReviews(w http.ResponseWriter, r *http.Request) {
 		"pull_requests": prs,
 	})
 }
-
-func (h *Handler) ReviewerStats(w http.ResponseWriter, r *http.Request) {
-	stats, err := h.svc.ReviewerStats(r.Context())
-	if err != nil {
-		h.handleError(w, err)
-		return
-	}
-	writeJSON(w, http.StatusOK, stats)
-}

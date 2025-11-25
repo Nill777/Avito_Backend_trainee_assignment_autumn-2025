@@ -141,22 +141,3 @@ func (r *repositoryImpl) ListPRsByReviewer(ctx context.Context, reviewerID strin
 	}
 	return prs, nil
 }
-
-func (r *repositoryImpl) GetReviewerStats(ctx context.Context) (map[string]int64, error) {
-	q := `SELECT user_id, COUNT(*) FROM pr_reviewers GROUP BY user_id`
-	rows, err := r.getQuerier(ctx).Query(ctx, q)
-	if err != nil {
-		return nil, r.handleError(err)
-	}
-	defer rows.Close()
-	stats := make(map[string]int64)
-	for rows.Next() {
-		var userID string
-		var count int64
-		if err := rows.Scan(&userID, &count); err != nil {
-			return nil, r.handleError(err)
-		}
-		stats[userID] = count
-	}
-	return stats, nil
-}

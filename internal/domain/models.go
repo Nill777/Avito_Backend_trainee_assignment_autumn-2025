@@ -44,3 +44,8 @@ type PullRequestShort struct {
 	AuthorID string   `json:"author_id"`
 	Status   PRStatus `json:"status"`
 }
+
+type UserAssignmentStats struct {
+	UserID          string `json:"user_id"`
+	AssignmentCount int64  `json:"assignment_count"`
+}
