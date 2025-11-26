@@ -1,7 +1,7 @@
 APP_NAME=reviewer
 MAIN_PATH=./cmd/app
 
-.PHONY: run build lint test test-cover docker-up docker-down logs clean
+.PHONY: run build lint test test-cover bench docker-up docker-down logs clean
 
 run:
 	go run $(MAIN_PATH)
@@ -18,6 +18,9 @@ test:
 test-cover:
 	go test -v -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out
+
+bench:
+	go test -v -bench=BenchmarkDeactivateTeam -run='^$$' ./internal/handler/... -benchtime=20x
 
 docker-up:
 	docker-compose up --build -d
