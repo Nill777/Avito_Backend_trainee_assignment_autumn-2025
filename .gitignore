@@ -1,0 +1,9 @@
+/bin/
+/reviewer
+
+.env
+.idea/
+.vscode/
+
+*.log
+*.out
