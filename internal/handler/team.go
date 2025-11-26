@@ -78,3 +78,24 @@ func (h *Handler) GetTeam(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, team)
 }
+
+func (h *Handler) DeactivateTeam(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		TeamName string `json:"team_name"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, "BAD_REQUEST", "invalid json")
+		return
+	}
+	if req.TeamName == "" {
+		writeAPIError(w, http.StatusBadRequest, "BAD_REQUEST", "team_name is required")
+		return
+	}
+
+	result, err := h.svc.DeactivateTeamAndRemoveReviews(r.Context(), req.TeamName)
+	if err != nil {
+		h.handleError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}

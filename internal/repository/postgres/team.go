@@ -37,3 +37,22 @@ func (r *repositoryImpl) ListTeams(ctx context.Context) ([]domain.Team, error) {
 	}
 	return teams, nil
 }
+
+func (r *repositoryImpl) DeactivateTeamMembers(ctx context.Context, teamName string) ([]domain.User, error) {
+	q := `UPDATE users SET is_active = false WHERE team_name = $1 AND is_active = true RETURNING id, username, team_name, is_active`
+	rows, err := r.getQuerier(ctx).Query(ctx, q, teamName)
+	if err != nil {
+		return nil, r.handleError(err)
+	}
+	defer rows.Close()
+
+	deactivatedUsers := make([]domain.User, 0)
+	for rows.Next() {
+		var u domain.User
+		if err := rows.Scan(&u.ID, &u.Username, &u.TeamName, &u.IsActive); err != nil {
+			return nil, r.handleError(err)
+		}
+		deactivatedUsers = append(deactivatedUsers, u)
+	}
+	return deactivatedUsers, nil
+}

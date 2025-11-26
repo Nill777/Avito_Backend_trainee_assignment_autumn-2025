@@ -49,3 +49,8 @@ type UserAssignmentStats struct {
 	UserID          string `json:"user_id"`
 	AssignmentCount int64  `json:"assignment_count"`
 }
+
+type DeactivationResult struct {
+	DeactivatedUsers []User             `json:"deactivated_users"`
+	AffectedPRs      []PullRequestShort `json:"affected_prs"`
+}

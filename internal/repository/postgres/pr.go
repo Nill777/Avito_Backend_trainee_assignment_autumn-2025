@@ -141,3 +141,39 @@ func (r *repositoryImpl) ListPRsByReviewer(ctx context.Context, reviewerID strin
 	}
 	return prs, nil
 }
+
+func (r *repositoryImpl) RemoveReviewersFromOpenPRs(ctx context.Context, userIDs []string) ([]domain.PullRequestShort, error) {
+	q := `
+		WITH deleted_reviews AS (
+			DELETE FROM pr_reviewers prr
+			WHERE prr.user_id = ANY($1)
+			  AND EXISTS (
+				SELECT 1
+				FROM pull_requests pr
+				WHERE pr.id = prr.pr_id AND pr.status = 'OPEN'
+			  )
+			RETURNING prr.pr_id
+		)
+		SELECT DISTINCT pr.id, pr.title, pr.author_id, pr.status
+		FROM pull_requests pr
+		JOIN deleted_reviews dr ON pr.id = dr.pr_id
+	`
+	rows, err := r.getQuerier(ctx).Query(ctx, q, userIDs)
+	if err != nil {
+		return nil, r.handleError(err)
+	}
+	defer rows.Close()
+
+	affectedPRs := make([]domain.PullRequestShort, 0)
+	for rows.Next() {
+		var pr domain.PullRequestShort
+		if err := rows.Scan(&pr.ID, &pr.Title, &pr.AuthorID, &pr.Status); err != nil {
+			return nil, r.handleError(err)
+		}
+		affectedPRs = append(affectedPRs, pr)
+	}
+	if affectedPRs == nil {
+		affectedPRs = []domain.PullRequestShort{}
+	}
+	return affectedPRs, nil
+}

@@ -11,6 +11,7 @@ type Repository interface {
 	CreateTeam(ctx context.Context, name string) (domain.Team, error)
 	GetTeamByName(ctx context.Context, name string) (domain.Team, error)
 	ListTeams(ctx context.Context) ([]domain.Team, error)
+	DeactivateTeamMembers(ctx context.Context, teamName string) ([]domain.User, error)
 
 	CreateUser(ctx context.Context, user domain.User) (domain.User, error)
 	GetUser(ctx context.Context, id string) (domain.User, error)
@@ -26,6 +27,7 @@ type Repository interface {
 	AddReviewers(ctx context.Context, prID string, reviewerIDs []string) error
 	RemoveReviewer(ctx context.Context, prID, userID string) error
 	ListPRsByReviewer(ctx context.Context, reviewerID string) ([]domain.PullRequestShort, error)
+	RemoveReviewersFromOpenPRs(ctx context.Context, userIDs []string) ([]domain.PullRequestShort, error)
 
 	GetReviewerStats(ctx context.Context) ([]domain.UserAssignmentStats, error)
 }

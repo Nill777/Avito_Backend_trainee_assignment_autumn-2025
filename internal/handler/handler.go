@@ -24,6 +24,7 @@ func New(svc *service.Service, log *slog.Logger) *Handler {
 func (h *Handler) RegisterRoutes(r chi.Router) {
 	r.Post("/team/add", h.CreateTeam)
 	r.Get("/team/get", h.GetTeam)
+	r.Post("/team/deactivate", h.DeactivateTeam)
 	r.Post("/users/setIsActive", h.SetUserActive)
 	r.Get("/users/getReview", h.GetUserReviews)
 	r.Post("/pullRequest/create", h.CreatePR)
