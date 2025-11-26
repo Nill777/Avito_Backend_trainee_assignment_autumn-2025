@@ -9,6 +9,9 @@ run:
 build:
 	go build -o bin/$(APP_NAME) $(MAIN_PATH)
 
+lint:
+	golangci-lint run
+
 docker-up:
 	docker-compose up --build -d
 
@@ -17,6 +20,6 @@ docker-down:
 
 logs:
 	docker-compose logs -f
-	
+
 clean:
 	rm -rf bin/

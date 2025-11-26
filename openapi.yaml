@@ -12,6 +12,7 @@ tags:
   - name: Users
   - name: PullRequests
   - name: Health
+  - name: Stats
 
 components:
   parameters:
@@ -124,6 +125,15 @@ components:
         status:
           type: string
           enum: [OPEN, MERGED]
+    UserAssignmentStats:
+      type: object
+      required: [ user_id, assignment_count ]
+      properties:
+        user_id:
+          type: string
+        assignment_count:
+          type: integer
+          format: int64
 
 paths:
   /team/add:
@@ -203,6 +213,59 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
 
+  /team/deactivate:
+    post:
+      tags: [Teams]
+      summary: Деактивировать всех участников команды и снять их с открытых PR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [team_name]
+              properties:
+                team_name:
+                  type: string
+            example:
+              team_name: payments
+      responses:
+        '200':
+          description: Операция успешно выполнена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deactivated_users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  affected_prs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PullRequestShort'
+              example:
+                deactivated_users:
+                  - user_id: "u2"
+                    username: "Bob"
+                    team_name: "backend"
+                    is_active": false
+                  - user_id: "u3"
+                    username: "Charlie"
+                    team_name": "backend"
+                    is_active": false
+                affected_prs:
+                  - pull_request_id": "pr-101"
+                    pull_request_name": "Fix critical bug"
+                    author_id": "u1"
+                    status": "OPEN"
+        '404':
+          description: Команда не найдена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
   /users/setIsActive:
     post:
       tags: [Users]
@@ -243,6 +306,35 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /users/getReview:
+    get:
+      tags: [Users]
+      summary: Получить PR'ы, где пользователь назначен ревьювером
+      parameters:
+        - $ref: '#/components/parameters/UserIdQuery'
+      responses:
+        '200':
+          description: Список PR'ов пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ user_id, pull_requests ]
+                properties:
+                  user_id:
+                    type: string
+                  pull_requests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PullRequestShort'
+              example:
+                user_id: u2
+                pull_requests:
+                  - pull_request_id: pr-1001
+                    pull_request_name: Add search
+                    author_id: u1
+                    status: OPEN
 
   /pullRequest/create:
     post:
@@ -395,31 +487,43 @@ paths:
                   value:
                     error: { code: NO_CANDIDATE, message: no active replacement candidate in team }
 
-  /users/getReview:
+  /healthz:
     get:
-      tags: [Users]
-      summary: Получить PR'ы, где пользователь назначен ревьювером
-      parameters:
-        - $ref: '#/components/parameters/UserIdQuery'
+      tags: [Health]
+      summary: Проверить работоспособность сервиса
       responses:
         '200':
-          description: Список PR'ов пользователя
+          description: Сервис работает
           content:
             application/json:
               schema:
                 type: object
-                required: [ user_id, pull_requests ]
                 properties:
-                  user_id:
+                  status:
                     type: string
-                  pull_requests:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PullRequestShort'
               example:
-                user_id: u2
-                pull_requests:
-                  - pull_request_id: pr-1001
-                    pull_request_name: Add search
-                    author_id: u1
-                    status: OPEN
+                status: "OK"
+                
+  /stats/assignments:
+      get:
+        tags: [Stats]
+        summary: Получить статистику по количеству назначений на ревью
+        responses:
+          '200':
+            description: Успешный ответ со статистикой
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required: [ stats ]
+                  properties:
+                    stats:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/UserAssignmentStats'
+                example:
+                  stats:
+                    - user_id: "u2"
+                      assignment_count: 7
+                    - user_id: "u3"
+                      assignment_count: 21

@@ -30,7 +30,7 @@ func main() {
 
 	if err := migrations.Run(cfg.DatabaseURL); err != nil {
 		log.Error("failed to run migrations", "error", err)
-		os.Exit(1)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -39,7 +39,7 @@ func main() {
 	repo, err := postgres.New(ctx, cfg.DatabaseURL)
 	if err != nil {
 		log.Error("failed to connect to database", "error", err)
-		os.Exit(1)
+		return
 	}
 
 	svc := service.New(repo)
